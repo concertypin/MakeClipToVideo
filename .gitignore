@@ -1,3 +1,5 @@
 venv/
 .idea
 clips
+*.mp4
+!Transition.mp4

@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import os
-import sys
 
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
@@ -26,14 +25,24 @@ def ClipDownload(url, FormatCode=None, path=None):  # 그냥 유튭 클립 다�
 
 
 def MergeVideos(VideoList, path):  # 그냥 리스트로 파일 path 받으면 합치는 무언가
-    UseableList = []
-    for i in range(len(VideoList)):
-        UseableList.append(VideoFileClip(VideoList[i]))
-    final_clip = concatenate_videoclips(UseableList)
-    final_clip.write_videofile(path)
+    try:
+        UseableList = []
+        for i in VideoList:
+            UseableList.append(VideoFileClip(i))
+        final_clip = concatenate_videoclips(UseableList) #todo 뭔가 트렌지션 부분이 깨지는 오류
+        final_clip.write_videofile(path)
+    except:
+        #코덱 에러
+        UseableList = []
+        cmd="ffmpeg -n -i \"{}\" \"{}\""
+        for i in VideoList:
+            os.system(cmd.format(i,i+".mp4"))
+            UseableList.append(VideoFileClip(i+".mp4"))
+        final_clip = concatenate_videoclips(UseableList)
+        final_clip.write_videofile(path)
 
 
-def MakeHotclip(CacheDir="clips", VideoCount=10, MaxVideo=10,TwitchID="snow_h",path="res.mov"):
+def MakeHotclip(CacheDir="clips", VideoCount=10, MaxVideo=10,TwitchID="snow_h",path="res.mp4"):
     """
     :param CacheDir:캐시용 폴더를 잡습니다.
     :param VideoCount: 이 조회수를 넘어야지만 다운받아요.
@@ -50,17 +59,21 @@ def MakeHotclip(CacheDir="clips", VideoCount=10, MaxVideo=10,TwitchID="snow_h",p
     except FileNotFoundError:
         pass
     else:
-        if (not ("debug" in os.listdir(CacheDir))):  # debug란 파일이 있으면 디버그 모드, 캐시를 이용함
-            print(f"CacheDir(\"{CacheDir}\") 은 존재하면 안 되요!")
-            return -1972
-        else:
-            debug=True
+        if(os.listdir(CacheDir)!=[]):
+            if (not ("debug" in os.listdir(CacheDir))):  # debug란 파일이 있으면 디버그 모드, 캐시를 이용함
+                print(f"CacheDir(\"{CacheDir}\") 은 존재하면 안 되요!")
+                return -1972
+            else:
+                debug=True
 
     # 디렉터리 정리
-    BetweenVideos = os.path.abspath("Transition.mov")
+    BetweenVideos = os.path.abspath("Transition.mp4")
     path=os.path.abspath(path)
     if(debug!=True):
-        os.mkdir(CacheDir)
+        try:
+            os.mkdir(CacheDir)
+        except FileExistsError:
+            pass
     os.chdir(CacheDir)
 
     # 클립 다운
@@ -74,6 +87,9 @@ def MakeHotclip(CacheDir="clips", VideoCount=10, MaxVideo=10,TwitchID="snow_h",p
     for i in FileList:
         VideoList.append(i)
         VideoList.append(BetweenVideos)
+
+    if(debug==True):
+        VideoList = VideoList[:2]
 
     # 병합
     MergeVideos(VideoList,path)
