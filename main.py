@@ -33,7 +33,7 @@ def MergeVideos(VideoList: List[str], path: str):  # 그냥 리스트로 파일 
     f.close()
 
     #cmd = f"ffmpeg -fflags +igndts -y -copytb 1 -use_wallclock_as_timestamps 1 -f concat -safe 0 -i \"{VideoListPath}\" -c copy \"{path}\""
-    cmd=["copy /b * tmp.ts",f"ffmpeg -y -i tmp.ts \"{path}\"","del tmp.ts"]
+    cmd=["copy /b encoded/* tmp.ts",f"ffmpeg -y -i tmp.ts \"{path}\"","del tmp.ts"]
     for i in cmd:
         os.system(i)
 
@@ -68,7 +68,7 @@ def MakeHotclip(CacheDir: str = "clips", VideoCount: int = 10, MaxVideo: int = 1
                     FastDebug = True
 
     # 디렉터리 정리
-    BetweenVideos = os.path.abspath("Transition.mp4")
+    BetweenVideos = os.path.abspath("Transition.ts")
     path = os.path.abspath(path)
     if (debug != True):
         try:
@@ -106,5 +106,5 @@ def MakeHotclip(CacheDir: str = "clips", VideoCount: int = 10, MaxVideo: int = 1
     # 병합
     MergeVideos(VideoList, path)
 
-
+os.system('chcp 65001')
 MakeHotclip()
