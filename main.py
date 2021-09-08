@@ -14,14 +14,14 @@ def MergeVideos(VideoList: List[str], path: str):  # 그냥 리스트로 파일 
             FileName = VideoList[i].split("\\")[-1]
             DirName = "\\".join(VideoList[i].split("\\")[:-1])
             # ffmpeg 전처리
-            #cmd='ffmpeg -i \"{}\" -n -video_track_timescale 15360 -vcodec copy -acodec copy \"{}\"'
+            cmd='ffmpeg -i \"{}\" -n -video_track_timescale 15360 -vcodec copy -acodec copy \"{}\"'
             #cmd = "ffmpeg -use_wallclock_as_timestamps 1 -correct_ts_overflow 0 -n -i \"{}\" \"{}\""
-            cmd="ffmpeg -n -i \"{}\" \"{}\" "
-            cmd = cmd.format(VideoList[i], DirName + "\\encoded\\" + FileName+".ts")
+            #cmd="ffmpeg -n -i \"{}\" \"{}\" "
+            cmd = cmd.format(VideoList[i], DirName + "\\encoded\\" + FileName+".mp4")
             with open("C:\\Users\\rophini\\PycharmProjects\\MakeClipToVideo\\log",mode="a",encoding="utf-8") as f:
                 f.write("ffmpeg 전처리 cmd\n"+cmd+"\n\n")
             os.system(cmd)
-            VideoList[i]=DirName + "\\encoded\\" + FileName+".ts"
+            VideoList[i]=DirName + "\\encoded\\" + FileName+".mp4"
         else:
             pass
 
@@ -32,10 +32,8 @@ def MergeVideos(VideoList: List[str], path: str):  # 그냥 리스트로 파일 
     f.write(ListString)
     f.close()
 
-    #cmd = f"ffmpeg -fflags +igndts -y -copytb 1 -use_wallclock_as_timestamps 1 -f concat -safe 0 -i \"{VideoListPath}\" -c copy \"{path}\""
-    cmd=["copy /b * tmp.ts",f"ffmpeg -y -i tmp.ts \"{path}\"","del tmp.ts"]
-    for i in cmd:
-        os.system(i)
+    cmd = f"ffmpeg -fflags +igndts -y -copytb 1 -use_wallclock_as_timestamps 1 -f concat -safe 0 -i \"{VideoListPath}\" -c copy \"{path}\""
+    os.system(cmd)
 
 
 def MakeHotclip(CacheDir: str = "clips", VideoCount: int = 10, MaxVideo: int = 10, TwitchID: str = "snow_h",
